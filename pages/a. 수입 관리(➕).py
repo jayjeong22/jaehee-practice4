@@ -20,16 +20,16 @@ with col_btn:
 # 입력 검증 및 반영
 if apply:
     if not month_text.strip().isdigit():
-        st.error("월은 1부터 12 사이의 숫자여야 합니다.")
+        st.error("1부터 12 사이의 숫자를 입력하세요!")
     elif not amount_text.strip().isdigit():
-        st.error("금액은 숫자로 입력하세요 (10단위).")
+        st.error("금액은 숫자로 입력하세요!")
     else:
         month = int(month_text.strip())
         amount = int(amount_text.strip())
         if not (1 <= month <= 12):
-            st.error("월은 1에서 12 사이여야 합니다.")
+            st.error("1부터 12 사이의 숫자를 입력하세요!")
         elif not (10 <= amount <= 250) or (amount % 10 != 0):
-            st.error("금액은 10에서 250 사이이며 10 단위로 입력해야 합니다.")
+            st.error("숫자를 10 단위로 입력하세요!")
         else:
             st.session_state["incomes"].append({"월": month, "수입": amount})
             st.success(f"{month}월에 {amount} 젤리 벌었습니다.")
@@ -54,7 +54,17 @@ if st.session_state["incomes"]:
                 # 해당 월의 모든 수입 항목 삭제
                 st.session_state["incomes"] = [e for e in st.session_state["incomes"] if int(e.get("월", -1)) != m]
                 st.success(f"{m}월의 수입 항목을 삭제했습니다.")
-                st.experimental_rerun()
+                # Streamlit 버전 차이로 experimental_rerun이 없을 수 있으므로 안전하게 처리
+                if hasattr(st, "experimental_rerun") and callable(getattr(st, "experimental_rerun")):
+                    try:
+                        st.experimental_rerun()
+                    except Exception:
+                        # rerun이 실패하면 현재 실행을 중단하여 변경된 세션 상태가 반영되도록 합니다.
+                        st.stop()
+                else:
+                    # 대체 동작: 세션에 더미 토글을 증가시키고 실행을 중단해 UI가 갱신되도록 유도합니다.
+                    st.session_state["_rerun_dummy"] = st.session_state.get("_rerun_dummy", 0) + 1
+                    st.stop()
 
     # 전체 합계 표시
     total_all = int(df_group["수입"].sum())

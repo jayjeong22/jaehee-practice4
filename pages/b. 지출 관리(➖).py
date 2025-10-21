@@ -17,16 +17,8 @@ with col_amount:
 with col_btn:
     apply = st.button("반영하기")
 
-# 금액 유효성 확인(항목 선택 표시용)
-valid_amount = False
-if amount_text.strip().isdigit():
-    amt = int(amount_text.strip())
-    if 10 <= amt <= 250 and amt % 10 == 0:
-        valid_amount = True
-
-# 금액이 유효할 때만 항목 선택 보여주기
-if valid_amount:
-    item = st.selectbox("항목을 선택하세요", ["권리 구매", "벌금"], key="expense_item")
+# 항목은 금액 입력 여부와 상관없이 항상 표시합니다.
+selected_item = st.selectbox("항목을 선택하세요", ["권리 구매", "벌금"], key="expense_item")
 
 # 반영 처리
 if apply:
@@ -44,15 +36,13 @@ if apply:
             st.error("금액은 10에서 1000 사이이며 10 단위로 입력해야 합니다.")
         else:
             # 항목 선택 여부 확인
-            if not valid_amount:
-                st.error("유효한 금액을 입력한 후 항목을 선택하세요.")
+            # 선택박스는 항상 렌더링되므로 session_state 또는 반환값에서 항목을 읽습니다.
+            selected_item = st.session_state.get("expense_item", selected_item)
+            if not selected_item:
+                st.error("항목을 선택하세요.")
             else:
-                selected_item = st.session_state.get("expense_item", None)
-                if not selected_item:
-                    st.error("항목을 선택하세요.")
-                else:
-                    st.session_state["expenses"].append({"월": month, "항목": selected_item, "지출": amount})
-                    st.success(f"{month}월에 [{selected_item}] 항목으로 {amount} 젤리 지출이 추가되었습니다.")
+                st.session_state["expenses"].append({"월": month, "항목": selected_item, "지출": amount})
+                st.success(f"{month}월에 [{selected_item}] 항목으로 {amount} 젤리 지출이 추가되었습니다.")
 
 # 등록된 지출을 간단한 표 형태로 표시 및 삭제 버튼 추가 (각 월 합계 옆) — 전체 합계 추가
 if st.session_state["expenses"]:
@@ -76,7 +66,15 @@ if st.session_state["expenses"]:
                 # 해당 월의 모든 항목 삭제
                 st.session_state["expenses"] = [e for e in st.session_state["expenses"] if int(e.get("월", -1)) != month]
                 st.success(f"{month}월의 지출 항목을 삭제했습니다.")
-                st.experimental_rerun()
+                # Streamlit 버전 차이로 experimental_rerun이 없을 수 있으므로 안전하게 처리
+                if hasattr(st, "experimental_rerun") and callable(getattr(st, "experimental_rerun")):
+                    try:
+                        st.experimental_rerun()
+                    except Exception:
+                        st.stop()
+                else:
+                    st.session_state["_rerun_dummy"] = st.session_state.get("_rerun_dummy", 0) + 1
+                    st.stop()
 
     # 전체 합계 표시
     total_all = int(df_group["지출"].sum())
