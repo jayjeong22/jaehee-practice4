@@ -3,10 +3,11 @@ import pandas as pd
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="디지털 용돈 기입장", layout="wide")
-st.title("디지털 용돈 기입장")
+header_image = "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80"
+st.image(header_image, use_column_width=True)
 
 # --- Hero section (simple site-like header with illustration) ---
-hero_col1, hero_col2 = st.columns([2, 1])
+hero_col1 = st.columns([2])[0]
 with hero_col1:
     st.markdown(
         """
@@ -18,14 +19,6 @@ with hero_col1:
         unsafe_allow_html=True,
     )
     st.write("")
-with hero_col2:
-    # Decorative illustration (Unsplash). Replace URL if you have a custom image.
-    st.image(
-        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=600&q=80",
-        use_column_width=True,
-    )
-
-    pass
 
 # navigation buttons placed right under the hero sentence
 # The buttons set a query param to request the target page and attempt a rerun.
@@ -45,19 +38,15 @@ def _safe_rerun():
 st.write("")
 st.caption("")
 nav_col1, nav_col2, nav_col3, nav_col4 = st.columns(4)
+btn_style = "background:#2563eb;color:white;padding:10px 18px;border-radius:8px;border:none;font-weight:600;display:inline-block;text-align:center;"
 with nav_col1:
-    if st.button("수입 관리"):
-        # Navigate to the deployed app's income page
-        components.html("""<script>window.location.href = 'https://moneypocket.streamlit.app/income';</script>""", height=0)
+    st.markdown(f"<a href='https://moneypocket.streamlit.app/income' target='_self'><button style=\"{btn_style}\">수입 관리</button></a>", unsafe_allow_html=True)
 with nav_col2:
-    if st.button("지출 관리"):
-        components.html("""<script>window.location.href = 'https://moneypocket.streamlit.app/expense';</script>""", height=0)
+    st.markdown(f"<a href='https://moneypocket.streamlit.app/spending' target='_self'><button style=\"{btn_style}\">지출 관리</button></a>", unsafe_allow_html=True)
 with nav_col3:
-    if st.button("예적금 관리"):
-        components.html("""<script>window.location.href = 'https://moneypocket.streamlit.app/savings';</script>""", height=0)
+    st.markdown(f"<a href='https://moneypocket.streamlit.app/savings' target='_self'><button style=\"{btn_style}\">예적금 관리</button></a>", unsafe_allow_html=True)
 with nav_col4:
-    if st.button("기부 관리"):
-        components.html("""<script>window.location.href = 'https://moneypocket.streamlit.app/donation';</script>""", height=0)
+    st.markdown(f"<a href='https://moneypocket.streamlit.app/donation' target='_self'><button style=\"{btn_style}\">기부 관리</button></a>", unsafe_allow_html=True)
 
 st.markdown("---")
 
