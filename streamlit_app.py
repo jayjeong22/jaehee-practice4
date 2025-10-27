@@ -1,10 +1,65 @@
 import streamlit as st
 import pandas as pd
+import streamlit.components.v1 as components
 
-st.set_page_config(page_title="내 계정 요약", layout="centered")
+st.set_page_config(page_title="디지털 용돈 기입장", layout="wide")
 st.title("디지털 용돈 기입장")
 
-st.write("아래는 내가 학급 화폐를 사용한 기록입니다. '이동' 버튼을 클릭하면 페이지로 이동해 편집할 수 있어요!")
+# --- Hero section (simple site-like header with illustration) ---
+hero_col1, hero_col2 = st.columns([2, 1])
+with hero_col1:
+    st.markdown(
+        """
+        <div style='padding:18px 24px; border-radius:12px; background:linear-gradient(90deg,#f7fbff,#ffffff);'>
+            <h1 style='margin:0; font-size:40px; line-height:1.05;'>나의 용돈을 한눈에 — 디지털 용돈 기입장</h1>
+            <p style='color:#334155; margin-top:8px; font-size:16px;'>수입·지출·예적금·기부 내역을 간단히 기록하고, 소비 습관에 맞춘 AI 조언을 받아보세요.</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    st.write("")
+with hero_col2:
+    # Decorative illustration (Unsplash). Replace URL if you have a custom image.
+    st.image(
+        "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=600&q=80",
+        use_column_width=True,
+    )
+
+    pass
+
+# navigation buttons placed right under the hero sentence
+# The buttons set a query param to request the target page and attempt a rerun.
+def _safe_rerun():
+    try:
+        # Prefer the official API when available
+        if hasattr(st, "experimental_rerun"):
+            st.experimental_rerun()
+        else:
+            # fallback: toggle a dummy key and stop to force UI refresh
+            st.session_state["_rerun_dummy"] = not st.session_state.get("_rerun_dummy", False)
+            st.stop()
+    except Exception:
+        st.session_state["_rerun_dummy"] = not st.session_state.get("_rerun_dummy", False)
+        st.stop()
+
+st.write("")
+st.caption("")
+nav_col1, nav_col2, nav_col3, nav_col4 = st.columns(4)
+with nav_col1:
+    if st.button("수입 관리"):
+        # client-side redirect to set query param so multipage navigates reliably
+        components.html("""<script>window.location.search = '?page=a. 수입 관리(➕)';</script>""", height=0)
+with nav_col2:
+    if st.button("지출 관리"):
+        components.html("""<script>window.location.search = '?page=b. 지출 관리(➖)';</script>""", height=0)
+with nav_col3:
+    if st.button("예적금 관리"):
+        components.html("""<script>window.location.search = '?page=c. 예적금 관리(💰)';</script>""", height=0)
+with nav_col4:
+    if st.button("기부 관리"):
+        components.html("""<script>window.location.search = '?page=d. 기부 관리(💌)';</script>""", height=0)
+
+st.markdown("---")
 
 # Ensure session keys exist
 incomes = st.session_state.get("incomes", [])
