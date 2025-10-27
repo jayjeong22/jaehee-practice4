@@ -47,17 +47,17 @@ st.caption("")
 nav_col1, nav_col2, nav_col3, nav_col4 = st.columns(4)
 with nav_col1:
     if st.button("수입 관리"):
-        # client-side redirect to set query param so multipage navigates reliably
-        components.html("""<script>window.location.search = '?page=a. 수입 관리(➕)';</script>""", height=0)
+        # Navigate to the deployed app's income page
+        components.html("""<script>window.location.href = 'https://moneypocket.streamlit.app/income';</script>""", height=0)
 with nav_col2:
     if st.button("지출 관리"):
-        components.html("""<script>window.location.search = '?page=b. 지출 관리(➖)';</script>""", height=0)
+        components.html("""<script>window.location.href = 'https://moneypocket.streamlit.app/expense';</script>""", height=0)
 with nav_col3:
     if st.button("예적금 관리"):
-        components.html("""<script>window.location.search = '?page=c. 예적금 관리(💰)';</script>""", height=0)
+        components.html("""<script>window.location.href = 'https://moneypocket.streamlit.app/savings';</script>""", height=0)
 with nav_col4:
     if st.button("기부 관리"):
-        components.html("""<script>window.location.search = '?page=d. 기부 관리(💌)';</script>""", height=0)
+        components.html("""<script>window.location.href = 'https://moneypocket.streamlit.app/donation';</script>""", height=0)
 
 st.markdown("---")
 
