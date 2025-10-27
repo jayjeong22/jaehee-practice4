@@ -16,10 +16,6 @@ st.markdown(
     .logo{width:44px; height:44px; border-radius:8px; background:var(--primary);}
     .nav-menu a{margin:0 10px; color:#0f172a; text-decoration:none; font-weight:700}
     .nav-right{color:#0f172a}
-
-    /* Button / CTA styles (applies to Streamlit native buttons and custom ones) */
-    .stButton>button, .btn-primary, .nav-menu a.button-like{background:var(--primary); color:white; padding:10px 16px; border-radius:8px; border:none; font-weight:700;}
-    .stButton>button:hover, .btn-primary:hover, .nav-menu a.button-like:hover{opacity:0.95; transform:translateY(-1px)}
     .hero{padding:18px 12px; border-radius:10px; background:linear-gradient(90deg,#f7fbff,#ffffff);}
     .cards{display:flex; gap:16px; margin-top:12px}
     .card{flex:1; padding:14px; border-radius:10px; background:white; box-shadow:0 6px 18px rgba(15,23,42,0.06)}
@@ -27,15 +23,7 @@ st.markdown(
     .card-amount{font-size:20px; font-weight:800; color:var(--primary); margin-top:6px}
     .ai-card{padding:16px; border-radius:10px; background:linear-gradient(90deg,#fffbeb,#fff7ed);}
     footer{margin-top:28px; padding:14px 0; color:#94a3b8; font-size:13px}
-        @media (max-width: 720px){ .cards{flex-direction:column} }
-        /* Responsive nav: show hamburger on small screens */
-        #nav-toggle{display:none}
-        .nav-toggle-label{display:none; font-size:20px; padding:6px 10px; border-radius:6px; cursor:pointer}
-        @media (max-width:720px){
-            .nav-menu{display:none; position:absolute; top:64px; left:10px; right:10px; background:white; flex-direction:column; padding:12px; border-radius:8px; box-shadow:0 8px 24px rgba(2,6,23,0.08)}
-            .nav-toggle-label{display:block}
-            #nav-toggle:checked ~ .nav-menu{display:flex}
-        }
+    @media (max-width: 640px){ .cards{flex-direction:column} }
     </style>
     """,
     unsafe_allow_html=True,
@@ -44,19 +32,17 @@ st.markdown(
 # --- Navigation bar ---
 nav_html = """
 <div class='navbar'>
-    <div class='nav-left'>
-        <div class='logo'></div>
-        <div style='font-weight:700'>디지털 용돈 기입장</div>
-    </div>
-    <input type='checkbox' id='nav-toggle'/>
-    <label for='nav-toggle' class='nav-toggle-label'>☰</label>
-    <div class='nav-menu'>
-        <a class='button-like' href='https://moneypocket.streamlit.app/income'>수입 관리</a>
-        <a class='button-like' href='https://moneypocket.streamlit.app/expense'>지출 관리</a>
-        <a class='button-like' href='https://moneypocket.streamlit.app/savings'>예적금 관리</a>
-        <a class='button-like' href='https://moneypocket.streamlit.app/donation'>기부 관리</a>
-    </div>
-    <div class='nav-right'>학생님</div>
+  <div class='nav-left'>
+    <div class='logo'></div>
+    <div style='font-weight:700'>디지털 용돈 기입장</div>
+  </div>
+  <div class='nav-menu'>
+    <a href='https://moneypocket.streamlit.app/income'>수입 관리</a>
+    <a href='https://moneypocket.streamlit.app/expense'>지출 관리</a>
+    <a href='https://moneypocket.streamlit.app/savings'>예적금 관리</a>
+    <a href='https://moneypocket.streamlit.app/donation'>기부 관리</a>
+  </div>
+  <div class='nav-right'>재희님</div>
 </div>
 """
 st.markdown(nav_html, unsafe_allow_html=True)
