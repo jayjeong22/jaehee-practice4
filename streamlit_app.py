@@ -3,50 +3,109 @@ import pandas as pd
 import streamlit.components.v1 as components
 
 st.set_page_config(page_title="디지털 용돈 기입장", layout="wide")
-header_image = "https://images.unsplash.com/photo-1542744173-8e7e53415bb0?auto=format&fit=crop&w=1200&q=80"
-st.image(header_image, use_column_width=True)
 
-# --- Hero section (simple site-like header with illustration) ---
-hero_col1 = st.columns([2])[0]
-with hero_col1:
-    st.markdown(
-        """
-        <div style='padding:18px 24px; border-radius:12px; background:linear-gradient(90deg,#f7fbff,#ffffff);'>
-            <h1 style='margin:0; font-size:40px; line-height:1.05;'>나의 용돈을 한눈에 — 디지털 용돈 기입장</h1>
-            <p style='color:#334155; margin-top:8px; font-size:16px;'>수입·지출·예적금·기부 내역을 간단히 기록하고, 소비 습관에 맞춘 AI 조언을 받아보세요.</p>
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-    st.write("")
+# --- Global CSS & fonts ---
+st.markdown(
+    """
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+    :root{ --primary:#2563eb; --accent:#10b981; --neutral:#64748b; }
+    html,body{font-family:'Noto Sans KR', sans-serif;}
+    .navbar{position:sticky; top:0; z-index:999; display:flex; align-items:center; justify-content:space-between; padding:10px 18px; background:linear-gradient(90deg,#ffffff,#f8fafc); border-radius:8px; box-shadow:0 2px 10px rgba(2,6,23,0.04);}
+    .nav-left{display:flex; align-items:center; gap:12px}
+    .logo{width:44px; height:44px; border-radius:8px; background:var(--primary);}
+    .nav-menu a{margin:0 10px; color:#0f172a; text-decoration:none; font-weight:700}
+    .nav-right{color:#0f172a}
+    .hero{padding:18px 12px; border-radius:10px; background:linear-gradient(90deg,#f7fbff,#ffffff);}
+    .cards{display:flex; gap:16px; margin-top:12px}
+    .card{flex:1; padding:14px; border-radius:10px; background:white; box-shadow:0 6px 18px rgba(15,23,42,0.06)}
+    .card-title{font-size:13px; color:#475569}
+    .card-amount{font-size:20px; font-weight:800; color:var(--primary); margin-top:6px}
+    .ai-card{padding:16px; border-radius:10px; background:linear-gradient(90deg,#fffbeb,#fff7ed);}
+    footer{margin-top:28px; padding:14px 0; color:#94a3b8; font-size:13px}
+    @media (max-width: 640px){ .cards{flex-direction:column} }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
 
-# navigation buttons placed right under the hero sentence
-# The buttons set a query param to request the target page and attempt a rerun.
-def _safe_rerun():
-    try:
-        # Prefer the official API when available
-        if hasattr(st, "experimental_rerun"):
-            st.experimental_rerun()
-        else:
-            # fallback: toggle a dummy key and stop to force UI refresh
-            st.session_state["_rerun_dummy"] = not st.session_state.get("_rerun_dummy", False)
-            st.stop()
-    except Exception:
-        st.session_state["_rerun_dummy"] = not st.session_state.get("_rerun_dummy", False)
-        st.stop()
+# --- Navigation bar ---
+nav_html = """
+<div class='navbar'>
+  <div class='nav-left'>
+    <div class='logo'></div>
+    <div style='font-weight:700'>디지털 용돈 기입장</div>
+  </div>
+  <div class='nav-menu'>
+    <a href='https://moneypocket.streamlit.app/income'>수입 관리</a>
+    <a href='https://moneypocket.streamlit.app/expense'>지출 관리</a>
+    <a href='https://moneypocket.streamlit.app/savings'>예적금 관리</a>
+    <a href='https://moneypocket.streamlit.app/donation'>기부 관리</a>
+  </div>
+  <div class='nav-right'>학생님</div>
+</div>
+"""
+st.markdown(nav_html, unsafe_allow_html=True)
 
+# --- Hero ---
+st.markdown("""
+<div class='hero'>
+  <h1 style='margin:0; font-size:28px;'>나의 용돈을 한눈에</h1>
+  <p style='color:#334155; margin:6px 0 0;'>수입·지출·예적금·기부 내역을 간단히 기록하고, 소비 습관에 맞춘 AI 조언을 받아보세요.</p>
+</div>
+""", unsafe_allow_html=True)
+
+# small spacing
 st.write("")
-st.caption("")
-nav_col1, nav_col2, nav_col3, nav_col4 = st.columns(4)
-btn_style = "background:#2563eb;color:white;padding:10px 18px;border-radius:8px;border:none;font-weight:600;display:inline-block;text-align:center;"
-with nav_col1:
-    st.markdown(f"<a href='https://moneypocket.streamlit.app/income' target='_self'><button style=\"{btn_style}\">수입 관리</button></a>", unsafe_allow_html=True)
-with nav_col2:
-    st.markdown(f"<a href='https://moneypocket.streamlit.app/spending' target='_self'><button style=\"{btn_style}\">지출 관리</button></a>", unsafe_allow_html=True)
-with nav_col3:
-    st.markdown(f"<a href='https://moneypocket.streamlit.app/savings' target='_self'><button style=\"{btn_style}\">예적금 관리</button></a>", unsafe_allow_html=True)
-with nav_col4:
-    st.markdown(f"<a href='https://moneypocket.streamlit.app/donation' target='_self'><button style=\"{btn_style}\">기부 관리</button></a>", unsafe_allow_html=True)
+
+# --- Summary cards (read session_state and render styled cards) ---
+# compute totals safely
+total_income = 0
+total_expense = 0
+total_savings = 0
+total_donations = 0
+if st.session_state.get("incomes"):
+    try:
+        total_income = int(pd.DataFrame(st.session_state.get("incomes"))["수입"].sum())
+    except Exception:
+        total_income = 0
+if st.session_state.get("expenses"):
+    try:
+        total_expense = int(pd.DataFrame(st.session_state.get("expenses"))["지출"].sum())
+    except Exception:
+        total_expense = 0
+if st.session_state.get("savings"):
+    try:
+        df_s = pd.DataFrame(st.session_state.get("savings"))
+        if "만기" in df_s.columns:
+            total_savings = int(df_s["만기"].fillna(0).sum())
+        else:
+            total_savings = int(df_s.get("원금", pd.Series(dtype=int)).fillna(0).sum())
+    except Exception:
+        total_savings = 0
+if st.session_state.get("donations"):
+    try:
+        df_d = pd.DataFrame(st.session_state.get("donations"))
+        # try common donation keys
+        amt_col = None
+        for c in ["기부(젤리)", "기부"]:
+            if c in df_d.columns:
+                amt_col = c
+                break
+        if amt_col:
+            total_donations = int(df_d[amt_col].fillna(0).sum())
+    except Exception:
+        total_donations = 0
+
+col1, col2, col3, col4 = st.columns(4)
+with col1:
+    st.markdown(f"<div class='card'><div class='card-title'>수입</div><div class='card-amount'>{total_income:,}원</div></div>", unsafe_allow_html=True)
+with col2:
+    st.markdown(f"<div class='card'><div class='card-title'>지출</div><div class='card-amount'>{total_expense:,}원</div></div>", unsafe_allow_html=True)
+with col3:
+    st.markdown(f"<div class='card'><div class='card-title'>예적금</div><div class='card-amount'>{total_savings:,}원</div></div>", unsafe_allow_html=True)
+with col4:
+    st.markdown(f"<div class='card'><div class='card-title'>기부</div><div class='card-amount'>{total_donations:,}원</div></div>", unsafe_allow_html=True)
 
 st.markdown("---")
 
@@ -98,7 +157,7 @@ else:
 
 
 ### 더 나은 소비를 위한 AI의 조언 듣기
-st.markdown("_사용 내역을 바탕으로 간단한 소비 조언을 받아보세요._")
+st.markdown("<div class='ai-card'><strong>사용 내역을 바탕으로 간단한 소비 조언을 받아보세요!</strong>", unsafe_allow_html=True)
 if st.button("더 나은 소비를 위한 조언 듣기"):
     # 합계 계산
     total_income = 0
@@ -126,4 +185,12 @@ if st.button("더 나은 소비를 위한 조언 듣기"):
             st.warning("만 12세의 평균보다 월 지출이 많습니다. 다음 달에는 월급의 일부를 더 저축해보는 것은 어떨까요?")
         else:
             st.success("지출 비율이 안정적입니다. 현재 여유가 있다면 적금 비중을 늘려 미래를 대비해보세요!")
+st.markdown("</div>", unsafe_allow_html=True)
+
+# Footer
+st.markdown("""
+<footer>
+    © 2025 젤리공화국 • 교육용 샘플 앱. 이 앱은 학습 목적으로 제공됩니다.
+</footer>
+""", unsafe_allow_html=True)
 
