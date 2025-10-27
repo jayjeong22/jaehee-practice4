@@ -20,7 +20,7 @@ for inc in incomes:
     # inc expected keys: '월', '수입'
     month = inc.get("월", "")
     amt = inc.get("수입", 0)
-    combined.append({"종류": "수입", "설명": f"{month}월", "금액": int(amt)})
+    combined.append({"종류": "수입", "설명": f"{month}월 월급", "금액": int(amt)})
 # 지출
 for exp in expenses:
     month = exp.get("월", "")
@@ -79,7 +79,7 @@ if st.button("더 나은 소비를 위한 조언 듣기"):
         ratio = total_expense / total_income
         # 50% 이상이면 지출 비중이 높음
         if ratio >= 0.5:
-            st.warning("당신과 같은 나이 사용자의 평균보다 월 지출이 많습니다. 다음 달에는 월급의 일부를 더 저축해보는 것은 어떨까요?")
+            st.warning("만 12세의 평균보다 월 지출이 많습니다. 다음 달에는 월급의 일부를 더 저축해보는 것은 어떨까요?")
         else:
             st.success("지출 비율이 안정적입니다. 현재 여유가 있다면 적금 비중을 늘려 미래를 대비해보세요!")
 
