@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
 
 st.set_page_config(page_title="내 계정 요약", layout="centered")
 st.title("디지털 용돈 기입장")
@@ -13,78 +12,40 @@ expenses = st.session_state.get("expenses", [])
 savings = st.session_state.get("savings", [])
 donations = st.session_state.get("donations", [])
 
-### 나의 수입
-st.subheader("나의 수입")
-if incomes:
-    df_inc = pd.DataFrame(incomes)
-    df_group = df_inc.groupby("월", as_index=False)["수입"].sum().sort_values("월")
-    labels = df_group["월"].astype(str) + "월"
-    sizes = df_group["수입"]
-    fig, ax = plt.subplots(figsize=(4, 4))
-    ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
-    ax.axis("equal")
-    st.pyplot(fig)
-    st.markdown(f"**총 수입: {int(df_group['수입'].sum())} 젤리**")
-else:
-    st.info("아직 등록된 수입이 없습니다. '수입 관리' 페이지에서 항목을 추가하세요.")
+### 전체 내역 (한 표로 보기)
+st.subheader("전체 거래 내역")
+combined = []
+# 수입
+for inc in incomes:
+    # inc expected keys: '월', '수입'
+    month = inc.get("월", "")
+    amt = inc.get("수입", 0)
+    combined.append({"종류": "수입", "설명": f"{month}월", "금액": int(amt)})
+# 지출
+for exp in expenses:
+    month = exp.get("월", "")
+    item = exp.get("항목") or f"{month}월"
+    amt = exp.get("지출", 0)
+    combined.append({"종류": "지출", "설명": item, "금액": int(amt)})
+# 예적금
+for s in savings:
+    prod = s.get("상품") or "예적금"
+    amt = s.get("원금") or s.get("만기") or 0
+    combined.append({"종류": "예적금", "설명": prod, "금액": int(amt)})
+# 기부
+for d in donations:
+    item = d.get("항목") or "기부"
+    amt = d.get("기부(젤리)") or d.get("기부") or 0
+    combined.append({"종류": "기부", "설명": item, "금액": int(amt)})
 
-### 나의 지출
-st.subheader("나의 지출")
-if expenses:
-    df_exp = pd.DataFrame(expenses)
-    # 항목별 분포가 있으면 항목별 파이차트, 없으면 월별
-    if "항목" in df_exp.columns:
-        df_group = df_exp.groupby("항목", as_index=False)["지출"].sum().sort_values("지출", ascending=False)
-        labels = df_group["항목"]
-        sizes = df_group["지출"]
-    else:
-        df_group = df_exp.groupby("월", as_index=False)["지출"].sum().sort_values("월")
-        labels = df_group["월"].astype(str) + "월"
-        sizes = df_group["지출"]
-    fig, ax = plt.subplots(figsize=(4, 4))
-    ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
-    ax.axis("equal")
-    st.pyplot(fig)
-    st.markdown(f"**총 지출: {int(df_group['지출'].sum())} 젤리**")
+if combined:
+    df_combined = pd.DataFrame(combined)
+    # 정렬: 종류별로 보여주기
+    df_combined = df_combined[["종류", "설명", "금액"]]
+    st.table(df_combined)
+    st.markdown(f"**총 합계: {int(df_combined['금액'].sum())} 젤리**")
 else:
-    st.info("아직 등록된 지출이 없습니다. '지출 관리' 페이지에서 항목을 추가하세요.")
-
-### 나의 예적금
-st.subheader("나의 예적금")
-if savings:
-    df_save = pd.DataFrame(savings)
-    if "상품" in df_save.columns and "원금" in df_save.columns:
-        df_group = df_save.groupby("상품", as_index=False)["원금"].sum()
-        labels = df_group["상품"]
-        sizes = df_group["원금"]
-        fig, ax = plt.subplots(figsize=(4, 4))
-        ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
-        ax.axis("equal")
-        st.pyplot(fig)
-        st.markdown(f"**총 원금: {int(df_save['원금'].sum())} 젤리 / 총 예상 이자: {int(df_save['이자'].sum())} 젤리**")
-    else:
-        st.info("예적금 데이터가 충분하지 않아 원그래프로 표시할 수 없습니다.")
-else:
-    st.info("아직 등록된 예적금 내역이 없습니다. '예적금 관리' 페이지에서 조회해 추가하세요.")
-
-### 나의 기부내역
-st.subheader("나의 기부내역")
-if donations:
-    df_don = pd.DataFrame(donations)
-    if "항목" in df_don.columns and "기부(젤리)" in df_don.columns:
-        df_group = df_don.groupby("항목", as_index=False)["기부(젤리)"].sum()
-        labels = df_group["항목"]
-        sizes = df_group["기부(젤리)"]
-        fig, ax = plt.subplots(figsize=(4, 4))
-        ax.pie(sizes, labels=labels, autopct="%1.1f%%", startangle=90)
-        ax.axis("equal")
-        st.pyplot(fig)
-        total_don = int(df_group["기부(젤리)"].sum())
-        st.markdown(f"**총 기부액: {total_don} 젤리**")
-    else:
-        st.info("기부 데이터가 충분하지 않아 원그래프로 표시할 수 없습니다.")
-else:
-    st.info("아직 등록된 기부 내역이 없습니다. '기부 관리' 페이지에서 추가하세요.")
+    st.info("아직 기록된 내역이 없습니다. 각 페이지에서 항목을 추가하세요.")
 
 
 ### 더 나은 소비를 위한 AI의 조언 듣기
