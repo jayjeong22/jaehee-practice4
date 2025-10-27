@@ -42,9 +42,11 @@ if combined:
     df_combined = pd.DataFrame(combined)
     # 정렬: 종류별로 보여주기
     df_combined = df_combined[["종류", "설명", "금액"]]
-    # 인덱스(왼쪽 순서) 없이 표시
-    st.table(df_combined.to_dict("records"))
-    st.markdown(f"**총 합계: {int(df_combined['금액'].sum())} 젤리**")
+    # 인덱스(왼쪽 순서) 없이 마크다운 표로 표시 (st.table이 인덱스를 표시하는 경우 대비)
+    md = "| 종류 | 설명 | 금액 |\n|---|---|---:|\n"
+    for r in df_combined.to_dict("records"):
+        md += f"| {r['종류']} | {r['설명']} | {r['금액']} |\n"
+    st.markdown(md)
     # 구분선 추가
     st.markdown("---")
 else:
