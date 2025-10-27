@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(page_title="수입 관리", layout="centered")
-st.title("수입 관리 (⸝⸝o̴̶̷᷇̂  ̫̣̌ o̴̶̷᷆̂⸝⸝)")
+st.title("수입 관리")
 
 # 세션 상태에 수입 목록 초기화
 if "incomes" not in st.session_state:

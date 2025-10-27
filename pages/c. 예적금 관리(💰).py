@@ -1,9 +1,13 @@
 import streamlit as st
 
 st.set_page_config(page_title="예적금 관리", layout="centered")
-st.title("예/적금 관리 (💰)")
+st.title("예/적금 관리")
 
 st.write("원하는 상품을 선택하고 금액을 입력한 뒤 '만기 금액 조회' 버튼을 누르세요.")
+
+# 세션 상태 초기화 (예적금 기록)
+if "savings" not in st.session_state:
+    st.session_state["savings"] = []
 
 # 상품 선택
 product = st.selectbox("상품을 선택하세요", ["예금", "적금 A", "적금 B"], key="saving_product")
@@ -36,6 +40,8 @@ if st.button("만기 금액 조회"):
                 interest_rate = 0.01
                 interest = amt * interest_rate
                 maturity = amt + interest
+                # 세션에 기록
+                st.session_state["savings"].append({"상품": product, "원금": int(amt), "이자": int(round(interest)), "만기": int(round(maturity))})
                 st.success(f"원금 {amt} 젤리 + 이자 {interest:.0f} 젤리 → 만기 금액: {maturity:.0f} 젤리")
             elif product == "적금 A":
                 # 적금 A: 월 이자율 10%, 원금은 20 단위 20~180
@@ -45,6 +51,7 @@ if st.button("만기 금액 조회"):
                     interest_rate = 0.10
                     interest = amt * interest_rate
                     maturity = amt + interest
+                    st.session_state["savings"].append({"상품": product, "원금": int(amt), "이자": int(round(interest)), "만기": int(round(maturity))})
                     st.success(f"원금 {amt} 젤리 + 이자 {interest:.0f} 젤리 → 만기 금액: {maturity:.0f} 젤리")
             elif product == "적금 B":
                 # 적금 B: 월 이자율 20%, 원금은 200부터 20 단위로 360까지
@@ -54,4 +61,5 @@ if st.button("만기 금액 조회"):
                     interest_rate = 0.20
                     interest = amt * interest_rate
                     maturity = amt + interest
+                    st.session_state["savings"].append({"상품": product, "원금": int(amt), "이자": int(round(interest)), "만기": int(round(maturity))})
                     st.success(f"원금 {amt} 젤리 + 이자 {interest:.0f} 젤리 → 만기 금액: {maturity:.0f} 젤리")

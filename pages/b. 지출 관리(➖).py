@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 st.set_page_config(page_title="지출 관리", layout="centered")
-st.title("지출 관리 (⸝⸝o̴̶̷᷇̂  ̫̣̌ o̴̶̷᷆̂⸝⸝)")
+st.title("지출 관리")
 
 # 세션 상태 초기화
 if "expenses" not in st.session_state:
