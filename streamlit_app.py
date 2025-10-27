@@ -16,6 +16,10 @@ st.markdown(
     .logo{width:44px; height:44px; border-radius:8px; background:var(--primary);}
     .nav-menu a{margin:0 10px; color:#0f172a; text-decoration:none; font-weight:700}
     .nav-right{color:#0f172a}
+
+    /* Button / CTA styles (applies to Streamlit native buttons and custom ones) */
+    .stButton>button, .btn-primary, .nav-menu a.button-like{background:var(--primary); color:white; padding:10px 16px; border-radius:8px; border:none; font-weight:700;}
+    .stButton>button:hover, .btn-primary:hover, .nav-menu a.button-like:hover{opacity:0.95; transform:translateY(-1px)}
     .hero{padding:18px 12px; border-radius:10px; background:linear-gradient(90deg,#f7fbff,#ffffff);}
     .cards{display:flex; gap:16px; margin-top:12px}
     .card{flex:1; padding:14px; border-radius:10px; background:white; box-shadow:0 6px 18px rgba(15,23,42,0.06)}
@@ -23,7 +27,15 @@ st.markdown(
     .card-amount{font-size:20px; font-weight:800; color:var(--primary); margin-top:6px}
     .ai-card{padding:16px; border-radius:10px; background:linear-gradient(90deg,#fffbeb,#fff7ed);}
     footer{margin-top:28px; padding:14px 0; color:#94a3b8; font-size:13px}
-    @media (max-width: 640px){ .cards{flex-direction:column} }
+        @media (max-width: 720px){ .cards{flex-direction:column} }
+        /* Responsive nav: show hamburger on small screens */
+        #nav-toggle{display:none}
+        .nav-toggle-label{display:none; font-size:20px; padding:6px 10px; border-radius:6px; cursor:pointer}
+        @media (max-width:720px){
+            .nav-menu{display:none; position:absolute; top:64px; left:10px; right:10px; background:white; flex-direction:column; padding:12px; border-radius:8px; box-shadow:0 8px 24px rgba(2,6,23,0.08)}
+            .nav-toggle-label{display:block}
+            #nav-toggle:checked ~ .nav-menu{display:flex}
+        }
     </style>
     """,
     unsafe_allow_html=True,
@@ -32,17 +44,19 @@ st.markdown(
 # --- Navigation bar ---
 nav_html = """
 <div class='navbar'>
-  <div class='nav-left'>
-    <div class='logo'></div>
-    <div style='font-weight:700'>디지털 용돈 기입장</div>
-  </div>
-  <div class='nav-menu'>
-    <a href='https://moneypocket.streamlit.app/income'>수입 관리</a>
-    <a href='https://moneypocket.streamlit.app/expense'>지출 관리</a>
-    <a href='https://moneypocket.streamlit.app/savings'>예적금 관리</a>
-    <a href='https://moneypocket.streamlit.app/donation'>기부 관리</a>
-  </div>
-  <div class='nav-right'>학생님</div>
+    <div class='nav-left'>
+        <div class='logo'></div>
+        <div style='font-weight:700'>디지털 용돈 기입장</div>
+    </div>
+    <input type='checkbox' id='nav-toggle'/>
+    <label for='nav-toggle' class='nav-toggle-label'>☰</label>
+    <div class='nav-menu'>
+        <a class='button-like' href='https://moneypocket.streamlit.app/income'>수입 관리</a>
+        <a class='button-like' href='https://moneypocket.streamlit.app/expense'>지출 관리</a>
+        <a class='button-like' href='https://moneypocket.streamlit.app/savings'>예적금 관리</a>
+        <a class='button-like' href='https://moneypocket.streamlit.app/donation'>기부 관리</a>
+    </div>
+    <div class='nav-right'>학생님</div>
 </div>
 """
 st.markdown(nav_html, unsafe_allow_html=True)
@@ -99,13 +113,13 @@ if st.session_state.get("donations"):
 
 col1, col2, col3, col4 = st.columns(4)
 with col1:
-    st.markdown(f"<div class='card'><div class='card-title'>수입</div><div class='card-amount'>{total_income:,}원</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='card'><div class='card-title'>수입</div><div class='card-amount'>{total_income:,} 젤리</div></div>", unsafe_allow_html=True)
 with col2:
-    st.markdown(f"<div class='card'><div class='card-title'>지출</div><div class='card-amount'>{total_expense:,}원</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='card'><div class='card-title'>지출</div><div class='card-amount'>{total_expense:,} 젤리</div></div>", unsafe_allow_html=True)
 with col3:
-    st.markdown(f"<div class='card'><div class='card-title'>예적금</div><div class='card-amount'>{total_savings:,}원</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='card'><div class='card-title'>예적금</div><div class='card-amount'>{total_savings:,} 젤리</div></div>", unsafe_allow_html=True)
 with col4:
-    st.markdown(f"<div class='card'><div class='card-title'>기부</div><div class='card-amount'>{total_donations:,}원</div></div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='card'><div class='card-title'>기부</div><div class='card-amount'>{total_donations:,} 젤리</div></div>", unsafe_allow_html=True)
 
 st.markdown("---")
 
@@ -148,7 +162,8 @@ if combined:
     # 인덱스(왼쪽 순서) 없이 마크다운 표로 표시 (st.table이 인덱스를 표시하는 경우 대비)
     md = "| 종류 | 설명 | 금액 |\n|---|---|---:|\n"
     for r in df_combined.to_dict("records"):
-        md += f"| {r['종류']} | {r['설명']} | {r['금액']} |\n"
+        amt_display = f"{int(r['금액']):,} 젤리"
+        md += f"| {r['종류']} | {r['설명']} | {amt_display} |\n"
     st.markdown(md)
     # 구분선 추가
     st.markdown("---")
