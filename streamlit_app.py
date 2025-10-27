@@ -42,8 +42,11 @@ if combined:
     df_combined = pd.DataFrame(combined)
     # 정렬: 종류별로 보여주기
     df_combined = df_combined[["종류", "설명", "금액"]]
-    st.table(df_combined)
+    # 인덱스(왼쪽 순서) 없이 표시
+    st.table(df_combined.to_dict("records"))
     st.markdown(f"**총 합계: {int(df_combined['금액'].sum())} 젤리**")
+    # 구분선 추가
+    st.markdown("---")
 else:
     st.info("아직 기록된 내역이 없습니다. 각 페이지에서 항목을 추가하세요.")
 
